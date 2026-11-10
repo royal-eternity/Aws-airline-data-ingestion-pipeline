@@ -1,0 +1,85 @@
+{
+  "Comment": "A description of my state machine",
+  "StartAt": "StartCrawler",
+  "States": {
+    "StartCrawler": {
+      "Type": "Task",
+      "Arguments": {
+        "Name": "raw_daily_file_crawler"
+      },
+      "Resource": "arn:aws:states:::aws-sdk:glue:startCrawler",
+      "Next": "GetCrawler"
+    },
+    "GetCrawler": {
+      "Type": "Task",
+      "Arguments": {
+        "Name": "raw_daily_file_crawler"
+      },
+      "Resource": "arn:aws:states:::aws-sdk:glue:getCrawler",
+      "Next": "Crawler Status Check"
+    },
+    "Crawler Status Check": {
+      "Type": "Choice",
+      "Choices": [
+        {
+          "Next": "Wait",
+          "Condition": "{% $states.input.Crawler.State = \"READY\" %}"
+        }
+      ],
+      "Default": "Glue StartJobRun"
+    },
+    "Wait": {
+      "Type": "Wait",
+      "Seconds": 10,
+      "Next": "GetCrawler"
+    },
+    "Glue StartJobRun": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::glue:startJobRun.sync",
+      "Arguments": {
+        "JobName": "airline_data_Ingestion"
+      },
+      "Catch": [
+        {
+          "ErrorEquals": [
+            "States.TaskFailed"
+          ],
+          "Next": "failed_notification"
+        }
+      ],
+      "Next": "Glue Job Satus Check"
+    },
+    "Glue Job Satus Check": {
+      "Type": "Choice",
+      "Choices": [
+        {
+          "Next": "Success Notification",
+          "Condition": "{% $states.input.JobRunState = \"SUCCEEDED\" %}"
+        },
+        {
+          "Next": "failed_notification",
+          "Condition": "{% $states.input.JobRunState = \"FAILED\" %}"
+        }
+      ]
+    },
+    "Success Notification": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::sns:publish",
+      "Arguments": {
+        "TopicArn": "arn:aws:sns:us-east-1:836548370628:airline-pipeline-email-alerts",
+        "Message": "Royal your Glue Job is Successful"
+      },
+      "End": true
+    },
+    "failed_notification": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::sns:publish",
+      "Arguments": {
+        "TopicArn": "arn:aws:sns:us-east-1:836548370628:airline-pipeline-email-alerts",
+        "Message": "GlueJob Execution Failed"
+      },
+      "End": true
+    }
+  },
+  "QueryLanguage": "JSONata"
+}

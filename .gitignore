@@ -1,0 +1,29 @@
+# Dataset files
+data/*.csv
+data/*.parquet
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Environment and credentials
+.env
+.env.*
+!.env.example
+.aws/
+credentials
+*.pem
+*.key
+
+# Logs
+*.log
+
+# Virtual environments
+.venv/
+venv/
+
+# IntelliJ
+.idea/
+# Root-level airline datasets
+/airports.csv
+/flights.csv
