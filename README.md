@@ -12,7 +12,7 @@ The workflow uses Amazon S3, AWS Glue Crawlers, AWS Glue ETL, Amazon EventBridge
 
 ## Architectural Diagram
 
-![Airline Data Ingestion Architecture](Images/AirlineProject.png)
+![AirlineProject](Images/AirlineProject.png)
 
 ---
 
