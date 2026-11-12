@@ -4,19 +4,17 @@
 
 ## Project Overview
 
-This project demonstrates an automated, event-driven airline data ingestion pipeline built using AWS services.
+This project demonstrates an event-driven airline data ingestion pipeline built using AWS services.
 
-The pipeline processes daily flight data uploaded to Amazon S3, uses AWS Glue for data discovery and ETL processing, and loads the transformed data into Amazon Redshift for further analysis.
+The pipeline ingests daily flight data from Amazon S3, processes it using AWS Glue, joins it with airport dimension data, and stores the transformed data in Amazon Redshift for further analysis.
 
-The workflow is orchestrated using AWS Step Functions and Amazon EventBridge. Amazon SNS is used to send email notifications when the workflow completes successfully or encounters an issue.
-
-**Technologies Used:** Amazon S3, AWS Glue, Amazon Redshift, Amazon EventBridge, AWS Step Functions, Amazon SNS, and AWS IAM.
+The workflow uses Amazon S3, AWS Glue Crawlers, AWS Glue ETL, Amazon EventBridge, AWS Step Functions, Amazon SNS, and Amazon Redshift.
 
 ---
 
 ## Architectural Diagram
 
-![AirlineProject](https://github.com/royal-eternity/Aws-airline-data-ingestion-pipeline/blob/main/Images/AirlineProject.jpg)
+![AirlineProject](Images/AirlineProject.jpg)
 
 ---
 
@@ -24,100 +22,123 @@ The workflow is orchestrated using AWS Step Functions and Amazon EventBridge. Am
 
 ### 1. Create an Amazon S3 Bucket
 
-- Create an S3 bucket named `airline-data-input` to store the airport dimension file and daily flight data files.
+Create an S3 bucket named `airline-dataset-gds77` to store the airport dimension data and daily flight input files.
 
-![S3](https://github.com/royal-eternity/Aws-airline-data-ingestion-pipeline/blob/main/Images/S3.JPG.jpeg)
+![S3](Images/S3.JPG.jpeg)
+
+---
 
 ### 2. Create a Schema and Tables in Amazon Redshift
 
-- Create a schema named `airlines` in Amazon Redshift.
-- Create the following tables:
-  - `airports_dim`
-  - `daily_flights_fact`
-- Load the airport dimension data from Amazon S3 into the `airports_dim` table.
+Create a schema named `airlines` in Amazon Redshift and create the following tables:
 
-![Redshift](https://github.com/royal-eternity/Aws-airline-data-ingestion-pipeline/blob/main/Images/Redshift.JPG.jpeg)
+- `airports_dim`
+- `daily_flights_fact`
+
+Load the airport dimension data from Amazon S3 into the `airports_dim` table.
+
+![Redshift](Images/Redshift.JPG.jpeg)
+
+---
 
 ### 3. Create AWS Glue Crawlers for Redshift Tables
 
-- Create AWS Glue crawlers to discover the Redshift tables and register their metadata in the AWS Glue Data Catalog.
+Create AWS Glue Crawlers to catalog the Redshift tables and make their metadata available for the data integration workflow.
 
-![RedShift_Crawlers](https://github.com/royal-eternity/Aws-airline-data-ingestion-pipeline/blob/main/Images/RedShift_Crawlers.JPG)
+![RedShift_Crawlers](Images/RedShift_Crawlers.JPG)
 
-### 4. Create AWS Glue Crawlers for S3 Input Data
+---
 
-- Create a sample Hive-style folder structure in Amazon S3 and upload a sample data file to configure the crawler.
-- Create and configure an AWS Glue crawler to discover the flight data stored in Amazon S3.
-- Verify the discovered tables in the AWS Glue Data Catalog.
+### 4. Create an AWS Glue Crawler for S3 Input Data
 
-**S3 Input Data:**
+Create a Hive-style folder structure in the S3 bucket and upload a sample data file to establish the crawler's source structure.
 
-![S3-crawler](https://github.com/royal-eternity/Aws-airline-data-ingestion-pipeline/blob/main/Images/S3-crawler.JPG)
+**S3 Input Data**
 
-**S3 Glue Crawler:**
+![S3-crawler](Images/S3-crawler.JPG)
 
-![S3-flight-data](https://github.com/royal-eternity/Aws-airline-data-ingestion-pipeline/blob/main/Images/S3-flight-data.JPG)
+**S3 Flight Data**
 
-**Glue Data Catalog Tables:**
+![S3-flight-data](Images/S3-flight-data.JPG)
 
-![glue-tables](https://github.com/royal-eternity/Aws-airline-data-ingestion-pipeline/blob/main/Images/glue-tables.JPG.jpeg)
+**AWS Glue Tables**
 
-### 5. Create the AWS Glue ETL Pipeline
+![glue-tables](Images/glue-tables.JPG.jpeg)
 
-- Create an AWS Glue ETL pipeline named `flight-data-ingestion-pipeline`.
-- Join the daily flight data with the airport dimension data.
-- Transform the data and generate a denormalized dataset for further analysis.
+---
 
-![glue-pipeline](https://github.com/royal-eternity/Aws-airline-data-ingestion-pipeline/blob/main/Images/glue-pipeline.JPG)
+### 5. Create the AWS Glue ETL Job
+
+Create an AWS Glue ETL job named `airline_data_Ingestion`.
+
+The job processes the daily flight data, joins it with the airport dimension data, and generates a denormalized dataset for further analysis.
+
+![glue-pipeline](Images/glue-pipeline.JPG)
+
+---
 
 ### 6. Configure Amazon SNS Notifications
 
-- Create an Amazon SNS topic named `glue-job-notification`.
-- Subscribe your email address to the topic to receive workflow notifications.
+Create an Amazon SNS topic and configure an email subscription to receive workflow notifications.
 
-![SNS](https://github.com/royal-eternity/Aws-airline-data-ingestion-pipeline/blob/main/Images/SNS.JPG.jpeg)
+![SNS](Images/SNS.JPG.jpeg)
 
-### 7. Create a State Machine Using AWS Step Functions
+---
 
-- Create a state machine using AWS Step Functions.
-- Configure the workflow to coordinate the Glue crawler, ETL job execution, and SNS notifications.
+### 7. Create an AWS Step Functions State Machine
 
-![StateMachine](https://github.com/royal-eternity/Aws-airline-data-ingestion-pipeline/blob/main/Images/StateMachine.JPG.jpeg)
+Create an AWS Step Functions state machine to orchestrate the data ingestion workflow.
 
-### 8. Create an Amazon EventBridge Rule
+The state machine coordinates the required AWS services and manages the execution of the workflow.
 
-- Create an EventBridge rule named `Airline-S3-StepFunc-EventRule`.
-- Configure the rule to detect object creation events in the airline data S3 bucket.
-- Set the rule to trigger the Step Functions state machine when a new object is uploaded.
+![StateMachine](Images/StateMachine.JPG.jpeg)
 
-![EventRule](https://github.com/royal-eternity/Aws-airline-data-ingestion-pipeline/blob/main/Images/EventRule.JPG.jpeg)
+---
+
+### 8. Configure an Amazon EventBridge Rule
+
+Configure an EventBridge rule to detect object creation events in the S3 bucket and trigger the Step Functions state machine.
+
+![EventRule](Images/EventRule.JPG.jpeg)
+
+---
 
 ### 9. Upload the Daily Flight Data
 
-- Upload the daily flight data CSV file to the input S3 bucket.
-- The S3 object creation event triggers the EventBridge rule, which starts the Step Functions workflow.
+Upload the daily flight CSV file to the S3 input location.
 
-**S3 File Upload:**
+The S3 object creation event triggers the EventBridge rule, which starts the Step Functions workflow.
 
-![fileUpload](https://github.com/royal-eternity/Aws-airline-data-ingestion-pipeline/blob/main/Images/fileUpload.JPG.jpeg)
+**S3 Input File**
 
-**AWS Glue Job Execution:**
+![fileUpload](Images/fileUpload.JPG.jpeg)
 
-![glueJobRun](https://github.com/royal-eternity/Aws-airline-data-ingestion-pipeline/blob/main/Images/glueJobRun.JPG.jpeg)
+**AWS Glue Job Execution**
 
-**Step Functions Execution:**
+![glueJobRun](Images/glueJobRun.JPG.jpeg)
 
-![StateMachineSuccess](https://github.com/royal-eternity/Aws-airline-data-ingestion-pipeline/blob/main/Images/StateMachineSuccess.JPG.jpeg)
+**Step Functions Execution**
+
+![StateMachineSuccess](Images/StateMachineSuccess.JPG.jpeg)
+
+---
 
 ### 10. Verify the Output
 
-- Check your subscribed email inbox for the successful workflow notification.
-- Verify that the transformed flight data has been loaded into the Amazon Redshift fact table.
+After successful execution, verify the workflow notification in the subscribed email inbox.
 
-**Email Notification:**
+**SNS Email Notification**
 
-![mailNoti](https://github.com/royal-eternity/Aws-airline-data-ingestion-pipeline/blob/main/Images/mailNoti.JPG.jpeg)
+![mailNoti](Images/mailNoti.JPG.jpeg)
 
-**Final Data in Redshift:**
+Verify that the processed flight data has been stored in the Amazon Redshift fact table.
 
-![factData](https://github.com/royal-eternity/Aws-airline-data-ingestion-pipeline/blob/main/Images/factData.JPG.jpeg)
+**Redshift Output Data**
+
+![factData](Images/factData.JPG.jpeg)
+
+---
+
+## Final Result
+
+Successfully implemented an event-driven airline data ingestion workflow using AWS services, from S3 data ingestion and automated orchestration to ETL processing and storage in Amazon Redshift.
