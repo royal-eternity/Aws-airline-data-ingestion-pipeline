@@ -10,16 +10,9 @@ The pipeline ingests daily flight data from Amazon S3, processes it using AWS Gl
 
 The workflow uses Amazon S3, AWS Glue Crawlers, AWS Glue ETL, Amazon EventBridge, AWS Step Functions, Amazon SNS, and Amazon Redshift.
 
----
-
-## Architectural Diagram
-
-
 ## Architectural Diagram
 
 ![Airline Data Ingestion Architecture](Images/AirlineProject.png)
-
----
 
 ---
 
