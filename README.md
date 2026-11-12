@@ -57,9 +57,6 @@ An airline daily data ingestion project using S3, S3 Cloudtrail Notification, Ev
 - we will create an Event Rule "Airline-S3-StepFunc-EventRule" Which will triger the State Machine on a Object Creation in airline data S3 bucket.
 ![EventRule](https://github.com/royal-eternity/Aws-airline-data-ingestion-pipeline/blob/main/Images/EventRule.JPG.jpeg)
 
-### 9. Create an Event Bridge Rule
-- we will create an Event Rule "Airline-S3-StepFunc-EventRule" Which will triger the State Machine on a Object Creation in airline data S3 bucket.
-![EventRule](https://github.com/royal-eternity/Aws-airline-data-ingestion-pipeline/blob/main/Images/EventRule.JPG.jpeg)
 
 ### 9. Upload the input flight data csv file 
 - we will upload the input flight data csv file in the input S3 bucket which will trigger the State machine using Event Bridge Rule.
@@ -72,7 +69,7 @@ An airline daily data ingestion project using S3, S3 Cloudtrail Notification, Ev
 - State Machine Run
 ![StateMachineSuccess](https://github.com/royal-eternity/Aws-airline-data-ingestion-pipeline/blob/main/Images/StateMachineSuccess.JPG.jpeg)
 
-### 9. Output
+### 10. Output
 - we can see the Success Notification in your subscribed mail box 
 ![mailNoti](https://github.com/royal-eternity/Aws-airline-data-ingestion-pipeline/blob/main/Images/mailNoti.JPG.jpeg)
 
